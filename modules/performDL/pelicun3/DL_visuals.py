@@ -1135,6 +1135,33 @@ def main(args):  # noqa: D103
         if args.comp_db_path == 'default_db':
             print(pelicun_path)  # noqa: T201
 
+        elif args.comp_db_path == 'dataset_paths':
+            try:
+                from pelicun.file_io import (  # noqa: PLC0415, RUF100
+                    resolve_default_dataset_path,
+                )
+            except ImportError:
+                print(  # noqa: T201
+                    'The installed pelicun does not provide dataset path '
+                    'resolution. pelicun >= 3.10 is required.',
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+
+            alias_map_path = pelicun_path / 'resources' / 'dlml_resource_paths.json'
+            with alias_map_path.open(encoding='utf-8') as f:
+                alias_map = json.load(f)
+
+            dataset_paths = {
+                alias: {
+                    'path': str(resolve_default_dataset_path(alias)),
+                    'id': dataset_id.rstrip('/'),
+                }
+                for alias, dataset_id in alias_map.items()
+            }
+
+            print(json.dumps(dataset_paths))  # noqa: T201
+
     # print("--- %s seconds ---" % (time.time() - start_time))
 
 
